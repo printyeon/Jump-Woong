@@ -38,7 +38,7 @@ bool isjsound = false;
 
 bool isCollide(Sprite s1, Sprite s2)
 {
-	return s1.getGlobalBounds().intersects(s2.getGlobalBounds());
+	return s1.getGlobalBounds().intersects(s2.getGlobalBounds()); //경계상자끼리 충돌을 하는가
 }
 
 int textPrint(Text& textMsg, Font& font, int size,
