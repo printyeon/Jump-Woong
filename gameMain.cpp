@@ -28,10 +28,11 @@ int index = 1;    //왼발 오른발 인덱스
 int floatBottom = -300; //바닥에서 좀 띄우는 용도
 const int PRICKLE_Y_BOTTOM = HEIGHT + floatBottom + 20;    //나무 바닥
 float hp = 30.0f;
-int prickleSpeed = 6;    //나무 스피드
+static int prickleSpeed = 6;    //나무 스피드
 float gravity = 4.3f;    //중력. 점프할때 사용
 bool stop = false;//걸을건지 안걸을 건지
-bool isreach = false; //
+bool isreach = false; //한번만 hp 닳기
+bool isjsound = false;
 
 bool isCollide(Sprite s1, Sprite s2)
 {
@@ -69,8 +70,7 @@ private:
 	bool isJumping = false;    //점프 중인지
 	bool isBottom = true;    //바닥에 발이 닿았는지
 
-	//뛰는 소리
-	SoundBuffer buffer1;
+	
 
 public:
 
@@ -104,12 +104,12 @@ public:
 	}
 
 	void jumpCheck() {
-		buffer1.loadFromFile("sound/jumpS.wav");
-		Sound jumpS(buffer1);
+		
+
 
 		if (isBottom && !isJumping)    //바닥이고, 점프중이 아닐때
 		{
-			jumpS.play();
+			isjsound = true;
 
 			isJumping = true;
 			isBottom = false;
@@ -143,7 +143,7 @@ public:
 		{
 			isJumping = false;
 		}
-		if(isBottom)
+		if (isBottom)
 			isreach = false;
 	}
 
@@ -158,7 +158,7 @@ public:
 			{
 				frame -= changeCount;
 				++index;
-				
+
 				if (index == 2) {
 					index = 0;
 				}
@@ -201,7 +201,7 @@ public:
 	}
 
 	void move() {
-		int randy = rand() % 200 + 470;
+		int randy = rand() % 200 + 370;
 		int randx = rand() % 300 + 920;
 
 		// 생성
@@ -271,13 +271,13 @@ public:
 
 
 	Prickles() {
-		
+
 		pricklePos.x = WIDTH - 20; //화면 밖에서 먼저 나오게 하기
 		pricklePos.y = PRICKLE_Y_BOTTOM;
-		
+
 		prickle2Pos.x = WIDTH - 20; //화면 밖에서 먼저 나오게 하기
 		prickle2Pos.y = PRICKLE_Y_BOTTOM;
-	
+
 	}
 	void move() {
 
@@ -322,15 +322,19 @@ int main(void)
 {
 	window.setFramerateLimit(60);    //프레임
 	static int score = -1; //0
-	
+
 #pragma region 소리
 
 		//메인 소리
 	SoundBuffer buffer;
 	buffer.loadFromFile("sound/mainS.wav");
 	Sound mainS(buffer);
+	mainS.setLoop(true); //무한반복
 
-
+	//뛰는 소리
+	SoundBuffer buffer1;
+	buffer1.loadFromFile("sound/jumpS.wav");
+	Sound jumpS(buffer1);
 
 	//동전 먹는 소리
 	SoundBuffer buffer2;
@@ -399,8 +403,10 @@ int main(void)
 	grass2Pos.y = 0;
 
 	//hp bar
-	RectangleShape rect(Vector2f(hp*15, 30));
+	RectangleShape rect(Vector2f(hp * 15, 30));
 	rect.setPosition(95, 12);
+
+	int random;
 
 	Player p = Player();
 	Prickles pri = Prickles();
@@ -417,7 +423,7 @@ int main(void)
 
 	Font font;
 	font.loadFromFile("font/Starborn.ttf");
-	
+
 	mainS.play();
 
 	while (window.isOpen())
@@ -436,7 +442,7 @@ int main(void)
 		{
 
 			textPrint(text6, font, 40, 270, 810, Color::White, "Enter To Start");
-			textPrint(text7, font, 80, 130, 210, Color::White,"jump woong");
+			textPrint(text7, font, 80, 130, 210, Color::White, "jump woong");
 
 			if (Keyboard::isKeyPressed(Keyboard::Enter)) //엔터 입력 감지
 			{
@@ -480,7 +486,7 @@ int main(void)
 					score = 0;
 					scoretxt = to_string(score);
 					stop = false;
-					
+
 					//텍스트 잠시 안보이게 다른곳으로 옮겨 놓기
 					text8.setPosition(-100, -100);
 					text3.setPosition(-100, -100);
@@ -493,7 +499,7 @@ int main(void)
 			}
 			else {
 #pragma region 충돌처리
-				
+
 				if (isCollide(wngArr[0], prickle) || isCollide(wngArr[1], prickle) || isCollide(wngArr[0], prickle2) || isCollide(wngArr[1], prickle2))
 				{
 					if (hp == 0) {
@@ -501,17 +507,28 @@ int main(void)
 					}
 					else {
 						if (!isreach) {
-							hp -= 0.5;
+							hp -= 1;
 							isreach = true;
 							rect.setSize(Vector2f(hp * 15, 30));
 
 						}
 
 					}
-				
+
 				}
 
+
 				if (isCollide(wngArr[0], heart) || isCollide(wngArr[1], heart)) {
+					random = rand() % 10 + 1;
+					if (random == 2)
+					{
+						hp += 2;
+					}
+					if (random == 7)
+					{
+						score += 2;
+					}
+
 					coinS.play();
 
 					c.trans(); //안보이게 숨기기
@@ -523,8 +540,14 @@ int main(void)
 				//점프
 				if (Keyboard::isKeyPressed(Keyboard::Space)) //스페이스 입력 감지
 				{
+					//
+
 					p.jumpCheck();
-					
+					if (isjsound) {
+						jumpS.play();
+						isjsound = false;
+					}
+						
 				}
 				p.jump();
 
