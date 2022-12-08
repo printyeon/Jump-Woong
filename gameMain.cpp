@@ -26,8 +26,8 @@ bool gameScene = false;
 
 int index = 1;    //왼발 오른발 인덱스
 int floatBottom = -300; //바닥에서 좀 띄우는 용도
-int PRICKLE_Y_BOTTOM = HEIGHT + floatBottom + 20;    //나무 바닥
-int hp = 30;
+const int PRICKLE_Y_BOTTOM = HEIGHT + floatBottom + 20;    //나무 바닥
+float hp = 30.0f;
 int prickleSpeed = 6;    //나무 스피드
 float gravity = 4.3f;    //중력. 점프할때 사용
 bool stop = false;//걸을건지 안걸을 건지
@@ -57,8 +57,8 @@ private:
 	Texture t1;
 	Texture t2;
 
-	int DINO_Y_BOTTOM = HEIGHT + floatBottom;
-	Position dinoPos;
+	const int WNG_Y_BOTTOM = HEIGHT + floatBottom;
+	Position wngPos;
 
 	//walk
 	float frame = 0.f;
@@ -75,31 +75,31 @@ private:
 public:
 
 	//getter
-	Position getDinoPos() const {
-		return dinoPos;
+	Position getWngPos() const {
+		return wngPos;
 	}
 
-	Sprite dinoInit() {
+	Sprite wngInit() {
 
 		t1.loadFromFile("img/dino1.png");
-		Sprite dino(t1);
+		Sprite wng(t1);
 
-		return dino;
+		return wng;
 	}
 
-	Sprite dino2Init() {
+	Sprite wng2Init() {
 
 		t2.loadFromFile("img/dino2.png");
-		Sprite dino2(t2);
+		Sprite wng2(t2);
 
-		return dino2;
+		return wng2;
 	}
 
 	//생성과 동시에 초기화
 	Player() {
 
-		dinoPos.x = 30;
-		dinoPos.y = DINO_Y_BOTTOM;
+		wngPos.x = 30;
+		wngPos.y = WNG_Y_BOTTOM;
 
 	}
 
@@ -121,25 +121,25 @@ public:
 
 		if (isJumping)
 		{
-			dinoPos.y -= gravity; //점프중일때는 y에서 중력을 뺴줌 그럼 올라감
+			wngPos.y -= gravity; //점프중일때는 y에서 중력을 뺴줌 그럼 올라감
 
 			stop = true;
 		}
 		else
 		{
-			dinoPos.y += gravity * 1.5;
+			wngPos.y += gravity * 1.5;
 			stop = false;
 		}
 
 		//극한
-		if (dinoPos.y >= DINO_Y_BOTTOM)    //바닥에서 지하로 가지 않도록 설정
+		if (wngPos.y >= WNG_Y_BOTTOM)    //바닥에서 지하로 가지 않도록 설정
 		{
-			dinoPos.y = DINO_Y_BOTTOM;
+			wngPos.y = WNG_Y_BOTTOM;
 
 			isBottom = true;
 
 		}
-		if (dinoPos.y <= DINO_Y_BOTTOM - 250)    //점프해서 우주로 가지 않도록 설정
+		if (wngPos.y <= WNG_Y_BOTTOM - 250)    //점프해서 우주로 가지 않도록 설정
 		{
 			isJumping = false;
 		}
@@ -152,7 +152,7 @@ public:
 			index = 0; //인덱스 고정시켜서 멈춰있기
 		}
 		else {
-			//dino step.
+			//wng step.
 			frame += frameSpeed;
 			if (frame > changeCount)
 			{
@@ -167,35 +167,36 @@ public:
 	}
 
 	void reset() {
-		dinoPos.y = DINO_Y_BOTTOM;
-		bool isJumping = false;
+		wngPos.y = WNG_Y_BOTTOM;
+		gravity = 4.3f;
+		isJumping = false;
 	}
 
 };
 
-class Coin {
+class Heart {
 private:
 	Texture t6;
-	Position coinPos;
+	Position heartPos;
 
 public:
 
 	//getter
-	Position getCoinPos() const {
-		return coinPos;
+	Position getHeartPos() const {
+		return heartPos;
 	}
 
-	Sprite coinInit() {
+	Sprite heartInit() {
 		t6.loadFromFile("img/coin_01.png");
 		Sprite coin(t6);
 
 		return coin;
 	}
 
-	Coin() {
+	Heart() {
 
-		coinPos.x = WIDTH - 20; //화면 밖에서 먼저 나오게 하기
-		coinPos.y = PRICKLE_Y_BOTTOM;
+		heartPos.x = WIDTH - 20; //화면 밖에서 먼저 나오게 하기
+		heartPos.y = PRICKLE_Y_BOTTOM;
 
 	}
 
@@ -204,25 +205,25 @@ public:
 		int randx = rand() % 300 + 920;
 
 		// 생성
-		if (coinPos.x <= -30)
+		if (heartPos.x <= -30)
 		{
-			coinPos.x = randx;
-			coinPos.y = randy;
+			heartPos.x = randx;
+			heartPos.y = randy;
 
 		}
 		else
 		{
-			coinPos.x -= prickleSpeed;
+			heartPos.x -= prickleSpeed;
 		}
 	}
 
 	void trans() {
-		coinPos.x = -200;
-		coinPos.y = -200;
+		heartPos.x = -200;
+		heartPos.y = -200;
 	}
 
 	void reset() {
-		coinPos.x = WIDTH - 20;
+		heartPos.x = WIDTH - 20;
 	}
 };
 
@@ -321,7 +322,7 @@ int main(void)
 {
 	window.setFramerateLimit(60);    //프레임
 	static int score = -1; //0
-
+	
 #pragma region 소리
 
 		//메인 소리
@@ -403,16 +404,16 @@ int main(void)
 
 	Player p = Player();
 	Prickles pri = Prickles();
-	Coin c = Coin();
+	Heart c = Heart();
 
 	Sprite prickle = pri.prickleInit();
 	Sprite prickle2 = pri.prickle2Init();
 
-	Sprite coin = c.coinInit();
+	Sprite heart = c.heartInit();
 
-	Sprite dinoArr[2];
-	dinoArr[0] = p.dinoInit();
-	dinoArr[1] = p.dino2Init();
+	Sprite wngArr[2];
+	wngArr[0] = p.wngInit();
+	wngArr[1] = p.wng2Init();
 
 	Font font;
 	font.loadFromFile("font/Starborn.ttf");
@@ -493,27 +494,24 @@ int main(void)
 			else {
 #pragma region 충돌처리
 				
-					if (isCollide(dinoArr[0], prickle) || isCollide(dinoArr[1], prickle) || isCollide(dinoArr[0], prickle2) || isCollide(dinoArr[1], prickle2))
-					{
-						//if(p.getDinoPos().y > 500)
-							//printf("sdfafasf");
-
-						
-						if (hp == 0) {
-							hp = 0; //마이너스로 안 가도록
-						}
-						else {
-							if (!isreach) {
-									hp--;
-									isreach = true;
-									rect.setSize(Vector2f(hp * 15, 30));
-								
-						}
-						
+				if (isCollide(wngArr[0], prickle) || isCollide(wngArr[1], prickle) || isCollide(wngArr[0], prickle2) || isCollide(wngArr[1], prickle2))
+				{
+					if (hp == 0) {
+						hp = 0; //마이너스로 안 가도록
 					}
+					else {
+						if (!isreach) {
+							hp -= 0.5;
+							isreach = true;
+							rect.setSize(Vector2f(hp * 15, 30));
+
+						}
+
+					}
+				
 				}
 
-				if (isCollide(dinoArr[0], coin) || isCollide(dinoArr[1], coin)) {
+				if (isCollide(wngArr[0], heart) || isCollide(wngArr[1], heart)) {
 					coinS.play();
 
 					c.trans(); //안보이게 숨기기
@@ -526,6 +524,7 @@ int main(void)
 				if (Keyboard::isKeyPressed(Keyboard::Space)) //스페이스 입력 감지
 				{
 					p.jumpCheck();
+					
 				}
 				p.jump();
 
@@ -583,7 +582,7 @@ int main(void)
 			prickle2.setPosition(pri.getPrickle2Pos().x, pri.getPrickle2Pos().y);
 
 			//coin Pos
-			coin.setPosition(c.getCoinPos().x, c.getCoinPos().y);
+			heart.setPosition(c.getHeartPos().x, c.getHeartPos().y);
 
 			//cloud Position.
 			cloud.setPosition(cloudPos.x, cloudPos.y);
@@ -592,8 +591,8 @@ int main(void)
 			grass.setPosition(grassPos.x, grassPos.y);
 			grass2.setPosition(grass2Pos.x, grass2Pos.y);
 
-			//dino Pos
-			dinoArr[index].setPosition(p.getDinoPos().x, p.getDinoPos().y);
+			//wng Pos
+			wngArr[index].setPosition(p.getWngPos().x, p.getWngPos().y);
 
 			//draw.
 			window.clear(Color::White);
@@ -608,10 +607,10 @@ int main(void)
 			window.draw(text8);
 			window.draw(text3);
 
-			window.draw(coin);
+			window.draw(heart);
 			window.draw(prickle);
 			window.draw(prickle2);
-			window.draw(dinoArr[index]);
+			window.draw(wngArr[index]);
 			window.draw(rect);
 
 
