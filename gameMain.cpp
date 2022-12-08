@@ -5,6 +5,7 @@
 #include <iostream>
 #include <string.h>
 #include <windows.h>
+#include<ctime>
 
 #define WIDTH 920
 #define HEIGHT 920
@@ -33,6 +34,7 @@ float gravity = 4.3f;    //중력. 점프할때 사용
 bool stop = false;//걸을건지 안걸을 건지
 bool isreach = false; //한번만 hp 닳기
 bool isjsound = false;
+
 
 bool isCollide(Sprite s1, Sprite s2)
 {
@@ -407,6 +409,7 @@ int main(void)
 	rect.setPosition(95, 12);
 
 	int random;
+	srand((unsigned int)time(NULL)); //완전한 랜덤을 위한 srand
 
 	Player p = Player();
 	Prickles pri = Prickles();
